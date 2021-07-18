@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Lập trình ứng dụng web</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <link href="static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script> -->
+  <script src="static/js/jquery.min.js"></script>
+  <script src="static/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    $(document).ready(function () {
+      $('#createUserForm #btn-create').click(function (event) {
+
+        const formData = {
+          username: $('#createUserForm input[name=username]').val(),
+          name: $('#createUserForm input[name=name]').val(),
+          gender: $('#createUserForm input[name=gender]').val()
+        }
+        const userId = $('#createUserForm input[name="user_id"]').val()
+        console.log(formData)
+        if (!userId) {
+          $.ajax({
+            method: "POST",
+            url: "http://localhost:3000/users",
+            data: JSON.stringify(formData),
+            contentType: 'application/json',
+            encode: true,
+          }).done(function (resp) {
+            const { status, data } = resp
+            console.log(resp)
+            if (status && data) {
+              // resp.forEach(function(val) {
+              $('#userList tbody').append(
+                `<tr class="user-id" data-userid="${data.id}"><td scope="row">${data.id}</td><td class="username">${data.username}</td><td class="name">${data.name}</td><td class="gender">${data.gender}</td><td><button class="del-btn btn btn-danger" data-id="${data.id}">Delete</button><button class="update-btn btn btn-warning" data-id="${data.id}">Update</button></td></tr>`
+              )
+              $(`button.del-btn[data-id="${data.id}"]`).click(function (e) {
+                const userId = $(this).attr('data-id')
+                console.log(userId)
+                $.ajax({
+                  method: "DELETE",
+                  url: `http://localhost:3000/users/${userId}`,
+                  contentType: 'application/json',
+                  encode: true,
+                }).done(function (resp) {
+                  const { status } = resp
+                  if (status) {
+                    $(`tr[data-userid="${userId}"]`).empty();
+                  }
+                })
+              })
+              $(`button.update-btn[data-id="${data.id}"]`).click(function (e) {
+                const userId = $(this).attr('data-id')
+                $('#createUserForm input[name="user_id"]').val(userId)
+                $('#createUserForm input[name=username]').val($(`tr[data-userid="${userId}"] td.username`).text())
+                $('#createUserForm input[name=name]').val($(`tr[data-userid="${userId}"] td.name`).text())
+                $(`#createUserForm input[id="${$(`tr[data-userid="${userId}"] td.gender`).text()}"]`).attr('checked', 'true')
+
+                $('#createUserForm #btn-create').text('Update')
+
+              })
+
+            }
+            // })
+          });
+        } else {
+          $.ajax({
+            method: "PUT",
+            url: `http://localhost:3000/users/${userId}`,
+            data: JSON.stringify(formData),
+            contentType: 'application/json',
+            encode: true,
+          }).done(function (resp) {
+            const { status, data } = resp
+            console.log(resp)
+            if (status && data) {
+              $(`tr[data-userid="${userId}"]`).empty();
+
+              // resp.forEach(function(val) {
+              $('#userList tbody').append(
+                `<tr class="user-id" data-userid="${userId}"><td scope="row">${userId}</td><td class="username">${data.username}</td><td class="name">${data.name}</td><td class="gender">${data.gender}</td></span><td><button class="del-btn btn btn-danger" data-id="${data.id}">Delete</button><button class="update-btn btn btn-warning" data-id="${data.id}">Update</button></td></tr>`
+              )
+              $(`button.del-btn[data-id="${data.id}"]`).click(function (e) {
+                const updatedUserId = $(this).attr('data-id')
+                $.ajax({
+                  method: "DELETE",
+                  url: `http://localhost:3000/users/${userId}`,
+                  contentType: 'application/json',
+                  encode: true,
+                }).done(function (resp) {
+                  const { status } = resp
+                  if (status) {
+                    $(`tr[data-userid="${userId}"]`).empty();
+                  }
+                })
+              })
+              $('button.update-btn[data-id="${data.id}"]').click(function (e) {
+                const userId = $(this).attr('data-id')
+                console.log($(`tr[data-userid="${userId}"] td.username`).text())
+                $('#createUserForm input[name="user_id"]').val(userId)
+                $('#createUserForm input[name=username]').val($(`tr[data-userid="${userId}"] td.username`).text())
+                $('#createUserForm input[name=name]').val($(`tr[data-userid="${userId}"] td.name`).text())
+                $(`#createUserForm input[id="${$(`tr[data-userid="${userId}"] td.gender`).text()}"]`).attr('checked', 'true')
+                $('#createUserForm #btn-create').val('Update')
+
+              })
+
+            }
+            // })
+          });
+        }
+
+
+        event.preventDefault();
+      })
+      // Get all
+      $.ajax({
+        type: "GET",
+        url: "http://localhost:3000/users",
+        contentType: 'application/json',
+        encode: true,
+      }).done(function (data) {
+        console.log(data)
+        data.forEach(function (val) {
+          $('#userList tbody').append(
+            `<tr class="user-id" data-userid="${val.id}"><td scope="row">${val.id}</td><td class="username">${val.username}</td><td class="name">${val.name}</td><td class="gender">${val.gender}</td><td><button class="del-btn btn btn-danger" data-id="${val.id}">Delete</button><button class="update-btn btn btn-warning" data-id="${val.id}">Update</button></td></tr>`
+          )
+        })
+        $('.del-btn').click(function (e) {
+          const userId = $(this).attr('data-id')
+          console.log(userId)
+          $.ajax({
+            method: "DELETE",
+            url: `http://localhost:3000/users/${userId}`,
+            contentType: 'application/json',
+            encode: true,
+          }).done(function (resp) {
+            const { status } = resp
+            if (status) {
+              $(`tr[data-userid="${userId}"]`).empty();
+            }
+          })
+        })
+        $('.update-btn').click(function (e) {
+          const userId = $(this).attr('data-id')
+          $('#createUserForm input[name="user_id"]').val(userId)
+          $('#createUserForm input[name="user_id"]').val(userId)
+          $('#createUserForm input[name=username]').val($(`tr[data-userid="${userId}"] td.username`).text())
+          $('#createUserForm input[name=name]').val($(`tr[data-userid="${userId}"] td.name`).text())
+          $(`#createUserForm input[id="${$(`tr[data-userid="${userId}"] td.gender`).text()}"]`).attr('checked', 'true')
+          $('#createUserForm #btn-create').text('Update')
+        })
+      });
+      $('#createUserForm input[name=user_id]').change(function (e) {
+        if ($('#createUserForm #btn-create').text()) {
+          $('#createUserForm #btn-create').text('Update')
+        } else {
+          $('#createUserForm #btn-create').text('Create')
+
+        }
+      })
+
+      $('#createUserForm button.btn-warning').on('click', function (e) {
+        $('#createUserForm input[name="user_id"]').val('')
+        $('#createUserForm input[name=username]').val('')
+        $('#createUserForm input[name=name]').val('')
+        $('#createUserForm #btn-create').text('Create')
+      })
+
+    })
+  </script>
+</head>
+
+<body>
+
+  <h1 id="firstHeading" class="first-heading">DEMO APP</h1>
+  <div class="container-md">
+    <div id="userList">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Username</th>
+            <th scope="col">Name</th>
+            <th scope="col">Gender</th>
+
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+
+      </table>
+    </div>
+    <div class="col-6">
+      <form id="createUserForm" method="POST" action="/users/create">
+        <label class="form-label" for="user_id">UserID:</label><br>
+        <input class="form-control" type="text" id="user_id" name="user_id"  disabled><br>
+        <label class="form-label" for="username">Username:</label><br>
+        <input class="form-control" type="text" id="username" name="username" value="John"><br>
+        <label class="form-label" for="name">Name:</label><br>
+        <input class="form-control" type="text" id="name" name="name" value="Doe">
+        <div class="form-check">
+          <label class="input-group form-label"></label><br>
+
+          <input class="form-check-input" type="radio" id="male" name="gender" value="male">
+          <label class="form-check-label" for="male">Male</label><br>
+          <input class="form-check-input" type="radio" id="female" name="gender" value="female">
+          <label class="form-check-label" for="female">Female</label><br>
+          <!-- <input type="radio" id="other" name="gender" value="other"> -->
+        </div>
+        <input class="btn btn-primary" type="submit" value="Submit">
+
+        <button id="btn-create" class="btn btn-success" type="button">Create</button>
+        <button id="btn-clear" class="btn btn-warning" type="button">Clear</button>
+
+      </form>
+    </div>
+
+
+  </div>
+
+</body>
+
+</html

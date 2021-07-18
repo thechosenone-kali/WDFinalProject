@@ -1,0 +1,41 @@
+extends layout.pug
+block content
+    h1(id="firstHeading" class="first-heading") DEMO APP
+    div(class='container-md')
+      div(id='postList')
+        table(class='table')
+          thead
+            tr
+              th(scope='col') Id 
+              th(scope='col') Title 
+              th(scope='col') Date 
+              th(scope='col') Action 
+          tbody
+            each val, index in data
+              tr(class='user-id' data-userid=val.id)
+                td(scope='row') #{val.id}
+                td(class='postTitle') #{val.title}
+                td(class='postDate') #{val.created}
+                 
+                td 
+                  button(class='del-btn btn btn-danger' data-id=val.id) Delete
+                  button(class='update-btn btn btn-warning' data-id=val.id) Update 
+      div(class='col-6')
+        form(id='createUserForm' method='POST' action='/posts/create')
+          label(class='form-label' for='post_id') PostID
+          input(class='form-control' type='text' id='post_id' name='post_id' disabled)
+          label(class='form-label' for='title') Title
+          input(class='form-control' type='text' id='title' name='title') 
+          label(class='form-label' for='content') Content
+          textarea(cols="30" rows="10" class='form-control' type='text' id='content' name='content')     
+          
+          input(class='btn btn-primary' type='submit' value='Create')
+          button(id='btn-clear' class='btn btn-warning' type='button') Clear
+          input(type="file" id="fileUpload" )
+          img(id='uploadedImage', alt='uploaded image', style='width:100px;visibility:hidden;')
+        form(id='logoutForm' method='GET' action='/logout')
+          input(class='btn btn-warning' type='submit' value='Log out')
+    script(src='/static/js/uploadImage.js')
+	  
+  
+
